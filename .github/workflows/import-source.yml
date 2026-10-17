@@ -1,0 +1,30 @@
+name: Import checked source snapshot
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download checked snapshot
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download v0.1.0 --pattern publication-source.zip --dir /tmp
+      - name: Extract source
+        run: |
+          python - <<'PY'
+          import zipfile
+          with zipfile.ZipFile('/tmp/publication-source.zip') as z:
+              for n in z.namelist():
+                  assert not n.startswith('/') and '..' not in n.split('/') and '.git' not in n.split('/')
+              z.extractall('.')
+          PY
+      - name: Commit imported source
+        run: |
+          git config user.name 'jianglixi-oss'
+          git config user.email '294673557+jianglixi-oss@users.noreply.github.com'
+          git add .
+          git commit -m 'feat: import checked NAS and TF music v0.1.0 source'
+          git push

@@ -21,6 +21,8 @@ jobs:
                   assert not n.startswith('/') and '..' not in n.split('/') and '.git' not in n.split('/')
               z.extractall('.')
           PY
+      - name: Preserve installed workflow
+        run: git restore .github/workflows/music.yml
       - name: Commit imported source
         run: |
           git config user.name 'jianglixi-oss'

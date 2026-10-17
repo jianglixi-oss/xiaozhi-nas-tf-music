@@ -1,0 +1,14 @@
+services:
+  music:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "8765:8765"
+    volumes:
+      - "${NAS_MUSIC_DIR}:/music:ro"
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true

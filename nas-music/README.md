@@ -45,3 +45,26 @@ NAS 与设备需互通，允许设备访问 TCP 8765；不要把该端口直接�
 
 2026-10-17：已在飞牛 NAS 部署，用户确认 Waveshare 板上 NAS 语音点歌播放通过。
 自动测试覆盖曲库搜索、签名、过期与 MCP stdio 握手及 HTTP 下载；未自动测试真实官方云端。
+
+## HomePod 播放（可选）
+
+配置 HOME_ASSISTANT_URL、HOME_ASSISTANT_TOKEN，以及 HOME_ASSISTANT_PLAYERS。
+后者为 JSON 对象，例如 `{"主卧":"media_player.bedroom"}`，仅允许列出的目标。
+将真实配置保存在 `.env`，不要提交到 GitHub；默认使用第一个目标，不改变音量。
+
+新增 `nas_homepod_players`、`nas_homepod_play(query, player, match_index)` 和 `nas_homepod_stop`。
+NAS 负责文件名搜索，HA 只执行 `media_player.play_media`，不要求 HomePod 支持 SEARCH_MEDIA。
+可以先 nas_music_search 查看最多 20 个候选，再以同一查询及零起始 match_index 播放。
+
+小智角色提示：
+
+```text
+用户要求用 HomePod 播放时，调用 nas_homepod_players 获取目标，
+然后 nas_homepod_play 搜索并投放。不要调用 HassMediaSearchAndPlay，
+也不要调用板子的 self.music.play_url。停止 HomePod 用 nas_homepod_stop。
+accepted 仅代表 HA 已接受请求；unknown 代表结果未知，不自动重试、不宣称已播放。
+```
+
+该功能不修复 HA/AirPlay 的超时或立体声组合兼容性，需实际确认出声。
+
+2026-10-22：用户确认通过小智调用新增工具播放和停止 HomePod 均正常；双只立体声同步未确认。

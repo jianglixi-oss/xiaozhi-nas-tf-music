@@ -8,6 +8,12 @@
 
 2026-10-17，用户在 Waveshare ESP32-S3-AUDIO-Board 上确认 **TF 卡播放、飞牛 NAS 语音点歌播放均通过**。NAS 端另验证了 MP3 HTTP 下载与签名拒绝。其他板型、屏幕变体、完整异常场景和所有网络模式尚未逐项验收。
 
+## HomePod（当前主分支）
+
+NAS MCP 可通过 Home Assistant 向配置的 HomePod 搜歌投放并停止播放，用户已于 2026-10-22 确认播放、停止通过。无需重刷板子固件。配置见 [NAS 说明](nas-music/README.md#homepod-播放可选)。HA token 只保存在私有 `.env` 中。立体声同步尚未验证。
+
+此功能尚未包含在 v0.1.0 发布附件中，请使用当前主分支的 NAS 源码。
+
 ## 快速开始
 
 1. 从 [Releases](https://github.com/jianglixi-oss/xiaozhi-nas-tf-music/releases) 下载固件包和 NAS 包。预编译固件仅适用于上述板型、默认 JD9853 屏幕。

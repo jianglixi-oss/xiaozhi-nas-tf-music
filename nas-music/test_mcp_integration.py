@@ -31,7 +31,8 @@ class IntegrationTests(unittest.IsolatedAsyncioTestCase):
                     await client.initialize()
                     listing = await client.list_tools()
                     self.assertEqual({t.name for t in listing.tools},
-                                     {'nas_music_search', 'nas_music_refresh'})
+                                     {'nas_music_search', 'nas_music_refresh', 'nas_homepod_players',
+                                      'nas_homepod_play', 'nas_homepod_stop'})
                     result = await client.call_tool('nas_music_search', {'query': 'Artist Song'})
                     self.assertFalse(result.isError)
                     payload = json.loads(next(c.text for c in result.content if c.type == 'text'))

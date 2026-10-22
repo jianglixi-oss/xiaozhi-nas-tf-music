@@ -7,6 +7,7 @@ from urllib.parse import parse_qs, urlsplit
 
 from mcp.server.fastmcp import FastMCP
 from library import Library
+from homepod import HomePod
 
 secret = os.environ.get('MUSIC_SIGNING_KEY', '')
 if len(secret) < 32 or secret.startswith('REPLACE'):
@@ -16,6 +17,7 @@ if urlsplit(base_url).scheme not in ('http', 'https'):
     raise RuntimeError('MUSIC_BASE_URL must be the HTTP(S) address reachable by the device')
 library = Library(os.environ.get('MUSIC_DIR', '/music'), secret, base_url)
 mcp = FastMCP('NAS MP3 Library')
+homepod = HomePod()
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -60,6 +62,41 @@ def nas_music_search(query: str, limit: int = 10) -> dict:
 def nas_music_refresh() -> dict:
     """Rescan the read-only music folder after files have been added or removed."""
     return {'indexed_mp3_files': library.refresh()}
+
+
+@mcp.tool()
+def nas_homepod_players() -> dict:
+    """List configured HomePod targets and current HA states. These can be individual
+    speakers even when Apple Home shows a stereo pair. No stereo synchronization is promised.
+    """
+    return {'players': [homepod.status(name) for name in homepod.players]}
+
+
+@mcp.tool()
+def nas_homepod_play(query: str, player: str = '', match_index: int = 0) -> dict:
+    """Play a NAS MP3 on HomePod via HA. Use this for HomePod requests, NOT
+    HassMediaSearchAndPlay (HomePod lacks SEARCH_MEDIA). Search happens on NAS.
+    player is a name from nas_homepod_players; empty selects the first configured target.
+    Use nas_music_search to inspect matches; match_index selects a zero-based result
+    from the same query (up to 20). Do not call self.music.play_url for HomePod.
+    accepted/unknown does not prove audible playback; never automatically retry unknown.
+    """
+    if not query.strip() or len(query) > 200:
+        return {'status': 'invalid_query'}
+    matches = library.search(query, 20)
+    if not matches:
+        return {'status': 'not_found'}
+    if not 0 <= match_index < len(matches):
+        return {'status': 'invalid_match_index', 'matches': [m['name'] for m in matches]}
+    selected = matches[match_index]
+    result = homepod.command('play_media', player, selected['url'])
+    return {**result, 'song': selected['name'], 'match_count': len(matches)}
+
+
+@mcp.tool()
+def nas_homepod_stop(player: str = '') -> dict:
+    """Stop a configured HomePod through HA. Empty player means the first target."""
+    return homepod.command('media_stop', player)
 
 
 if __name__ == '__main__':

@@ -17,8 +17,8 @@ with zipfile.ZipFile(firmware) as src, zipfile.ZipFile(fw_out, 'w', zipfile.ZIP_
     for name in notices:
         dst.write(root / name, name)
 files = ['.env.example', 'Dockerfile', 'compose.yaml', 'bootstrap.py', 'library.py',
-         'server.py', 'mcp_pipe.py', 'requirements.txt', 'README.md',
-         'test_library.py', 'test_mcp_integration.py']
+         'server.py', 'homepod.py', 'mcp_pipe.py', 'requirements.txt', 'README.md',
+         'test_library.py', 'test_homepod.py', 'test_mcp_integration.py']
 with zipfile.ZipFile(nas_out, 'w', zipfile.ZIP_DEFLATED) as dst:
     for name in files:
         dst.write(root / 'nas-music' / name, 'nas-music/' + name)

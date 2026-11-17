@@ -7,6 +7,7 @@
 
 - NAS：云端 MCP 按文件名搜索 MP3，返回 15 分钟有效地址，再调用设备 `self.music.play_url`。
 - TF：FAT32 卡根目录创建 `music` 文件夹，放入 MP3；支持最多四层子目录，索引上限 1000 首。
+- 电台：NAS 端 `stations.json` 管理电台列表，`nas_radio_list` 列出电台，复用设备 `self.music.play_url` 播放连续流。
 - 设备：MP3 解码、立体声混为单声道、重采样到现有音频驱动采样率（24kHz），共用 AudioService 输出队列。
 - 搜歌、播放、停止、现有音量工具；唤醒或按 BOOT 结束音乐并回到对话。
 - 暂未实现暂停续播、自动连续播放、上下首、进度跳转、FLAC/AAC、歌词、飞牛音乐收藏/歌单接口。
@@ -63,6 +64,8 @@ HTTP 只用于局域网，URL 签名仍属于短期凭据。请勿把端口直�
 ```text
 播放 NAS 音乐时，先调用 nas_music_search，按用户指定的歌手和版本选择结果，
 再调用结果中的 self.music.play_url，原样传入 device_arguments。
+播放电台时，先调用 nas_radio_list 选择电台，再调用返回的 device_tool
+（self.music.play_url）并原样传入 device_arguments；电台是连续流，停止用 self.music.stop。
 播放 TF 卡音乐时，先 self.music.tf_search，再 self.music.tf_play。
 TF 曲库在后台索引，首次开机可等待几秒；曲库变化后调用 self.music.tf_refresh。
 停止音乐使用 self.music.stop。不要把排队成功说成已经播放成功。

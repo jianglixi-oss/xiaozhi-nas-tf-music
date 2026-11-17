@@ -8,6 +8,7 @@ from urllib.parse import parse_qs, urlsplit
 from mcp.server.fastmcp import FastMCP
 from library import Library
 from homepod import HomePod
+from radio import Radio
 
 secret = os.environ.get('MUSIC_SIGNING_KEY', '')
 if len(secret) < 32 or secret.startswith('REPLACE'):
@@ -16,6 +17,7 @@ base_url = os.environ['MUSIC_BASE_URL']
 if urlsplit(base_url).scheme not in ('http', 'https'):
     raise RuntimeError('MUSIC_BASE_URL must be the HTTP(S) address reachable by the device')
 library = Library(os.environ.get('MUSIC_DIR', '/music'), secret, base_url)
+radio = Radio(os.environ.get('RADIO_STATIONS', '/music/stations.json'))
 mcp = FastMCP('NAS MP3 Library')
 homepod = HomePod()
 
@@ -62,6 +64,20 @@ def nas_music_search(query: str, limit: int = 10) -> dict:
 def nas_music_refresh() -> dict:
     """Rescan the read-only music folder after files have been added or removed."""
     return {'indexed_mp3_files': library.refresh()}
+
+
+@mcp.tool()
+def nas_radio_list() -> dict:
+    """List configured internet radio stations. To play one, call the returned
+    device_tool with device_arguments (self.music.play_url with the station URL).
+    A radio stream is continuous; stop it with self.music.stop."""
+    return {'stations': radio.list()}
+
+
+@mcp.tool()
+def nas_radio_refresh() -> dict:
+    """Reload the radio station list after editing stations.json."""
+    return {'station_count': radio.refresh()}
 
 
 @mcp.tool()

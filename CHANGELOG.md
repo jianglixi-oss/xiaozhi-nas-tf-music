@@ -1,12 +1,11 @@
 # 变更记录
 
-## 未发布 — 2026-10-22
+## v0.2.0 — 2026-11-17
 
-- 新增 HomePod 目标查询、NAS 搜歌后通过 HA 投放、停止播放工具。
-- 绕开 HomePod 不具备 SEARCH_MEDIA 能力的限制，目标限制在私有配置的播放器列表内。
-- HA 超时返回结果未知，不自动重试，不宣称已出声。
+- 新增电台功能：NAS 端 `stations.json` 管理电台列表，`nas_radio_list`/`nas_radio_refresh` 工具列出与刷新电台，复用设备 `self.music.play_url` 播放连续流。
+- 音乐解码支持 AAC（ADTS / AAC-Plus）：`DecodeMusic` 自动识别 MP3/AAC 并选用对应解码器，使蜻蜓FM 等国内电台 AAC 流可播。
+- 新增 HomePod 目标查询、NAS 搜歌后通过 HA 投放、停止播放工具；绕开 HomePod 不具备 SEARCH_MEDIA 能力的限制。
 - 9 项自动化测试通过；用户确认小智控制 HomePod 播放和停止均通过。
-- 此验证不代表双 HomePod 立体声同步已通过。
 
 ## v0.1.0 — 2026-10-17
 

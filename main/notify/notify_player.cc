@@ -212,7 +212,7 @@ void NotifyPlayer::WorkerTask() {
         if (audio_url.starts_with("/sdcard/music/")) {
             FILE* file = std::fopen(audio_url.c_str(), "rb");
             if (file) {
-                success = DecodeMusicMp3(
+                success = DecodeMusic(
                     [file](uint8_t* data, size_t size) {
                         size_t n = std::fread(data, 1, size, file);
                         return std::ferror(file) ? -1 : static_cast<int>(n);
@@ -228,7 +228,7 @@ void NotifyPlayer::WorkerTask() {
                 if (http->Open("GET", audio_url)) {
                     auto status = http->GetStatusCode();
                     if (status && *status == 200) {
-                        success = DecodeMusicMp3(
+                        success = DecodeMusic(
                             [&http](uint8_t* data, size_t size) {
                                 auto n = http->Read(reinterpret_cast<char*>(data), size);
                                 return n ? static_cast<int>(*n) : -1;

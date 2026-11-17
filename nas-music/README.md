@@ -19,11 +19,38 @@ NAS 与设备需互通，允许设备访问 TCP 8765；不要把该端口直接�
 ```text
 播放 NAS 歌曲时先调用 nas_music_search，再用选中结果的 device_arguments
 调用设备 self.music.play_url。找不到时说明曲库未找到，不要假装播放。
+播放电台时先调用 nas_radio_list 选择电台，再调用返回的 device_tool
+（self.music.play_url）并原样传入 device_arguments。电台是连续流，停止用
+self.music.stop，查询结果用 self.music.status。
 停止使用 self.music.stop，查询结果使用 self.music.status。
 ```
 
 歌曲新增后调用 `nas_music_refresh`；目前不支持 FLAC、飞牛音乐歌单及收藏。
 设备固件必须提供 `self.music.play_url`，官方原版 v2.5.2 单独配此服务无法播放。
+
+## 电台
+
+电台复用设备现有的 `self.music.play_url` 播放链路（电台是连续 HTTP MP3 流，与
+点歌 URL 同一种播放方式），因此**设备固件无需改动**，只需 NAS 端管理电台列表。
+
+1. 在音乐目录（`NAS_MUSIC_DIR` 指向的文件夹）里放一个 `stations.json`，每项一个
+   电台名和 HTTP/HTTPS MP3 流地址：
+
+   ```json
+   [
+     {"name": "中国之声", "url": "http://example.com/cnr1.mp3"},
+     {"name": "音乐之声", "url": "http://example.com/cnr2.mp3"}
+   ]
+   ```
+
+2. 容器启动时会读取 `/music/stations.json`（即宿主的 `NAS_MUSIC_DIR/stations.json`）。
+   修改后调用 `nas_radio_refresh` 立即生效，无需重启。
+
+3. 电台 URL 必须是设备能直接访问的 HTTP/HTTPS MP3 流（Icecast/Shoutcast）。很多
+   国内电台已改用 HLS，需找仍提供 HTTP MP3 的流地址。示例里带两个已验证可用的
+   国际流（SomaFM、Radio Paradise），可替换为你需要的电台。
+
+角色提示中已包含电台播放与停止的调用方式，无需额外修改。
 
 桥接程序 `mcp_pipe.py` 来自 https://github.com/78/mcp-calculator 。
 

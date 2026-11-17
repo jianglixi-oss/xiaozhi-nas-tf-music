@@ -1,6 +1,6 @@
 # XiaoZhi NAS / TF Music
 
-为 **Waveshare ESP32-S3-AUDIO-Board** 增加 NAS MP3 点歌和 TF 卡 MP3 播放，继续使用 **xiaozhi.me 官方服务器**。
+为 **Waveshare ESP32-S3-AUDIO-Board** 增加 NAS MP3 点歌、TF 卡 MP3 播放和网络电台，继续使用 **xiaozhi.me 官方服务器**。
 
 基于 [78/xiaozhi-esp32](https://github.com/78/xiaozhi-esp32) v2.5.2（`49b4380b3faa0ceadd28a3e78aaf0f311c46c57e`）。这是社区改造版本，与小智、微雪官方无隶属关系。保留上游源码与来源信息；原说明见 [README_UPSTREAM.md](README_UPSTREAM.md)。
 
@@ -25,6 +25,7 @@ NAS MCP 可通过 Home Assistant 向配置的 HomePod 搜歌投放并停止播�
 ```text
 播放 NAS 音乐时先调用 nas_music_search，选择用户要求的歌曲和版本，
 再调用选中结果的 device_tool，原样传入 device_arguments。
+播放电台时先调用 nas_radio_list 选择电台，再调用返回的 device_tool。
 播放 TF 音乐时先 self.music.tf_search，再 self.music.tf_play。
 停止使用 self.music.stop，查询状态使用 self.music.status。
 只有工具报告实际播放时才说明已播放，排队不代表已经出声。
@@ -33,9 +34,10 @@ NAS MCP 可通过 Home Assistant 向配置的 HomePod 搜歌投放并停止播�
 ## 工作方式与限制
 
 - NAS MCP 按 MP3 文件名搜索；设备通过局域网 HTTP 拉流、解码并输出。签名 URL 有效期 15 分钟。
+- 电台经 `nas_radio_list` 列出，复用同一 HTTP 拉流播放链路，支持 MP3 与 AAC（ADTS / AAC-Plus）。
 - TF 本地文件读取无需 NAS；语音指令和点歌仍依赖官方云端。
 - 支持停止、现有音量控制，唤醒或 BOOT 返回对话。输出为单声道。
-- 暂不支持 FLAC/AAC、暂停续播、自动连播、上下首、进度跳转、歌词。
+- 暂不支持 FLAC、暂停续播、自动连播、上下首、进度跳转、歌词。
 - 直接读取共享音乐目录，不调用飞牛音乐私有 API，不读取收藏或歌单。
 - 音乐变体关闭自动安装官方 OTA；后续升级需手动使用适配的音乐固件。
 - 原版官方固件没有音乐设备工具，单独部署 NAS MCP 无法完成播放。
